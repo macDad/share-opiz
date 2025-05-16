@@ -1,33 +1,26 @@
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
-public class HashUtils {
+public class HashUtil {
 
     public static String computeHmacHash(String password, String salt, int iterations, String algorithm) {
         try {
-            // Convert legacy algo string to Java equivalent (e.g., "HMACSHA256")
-            String macAlgorithm = algorithm.replace("HMAC", "Hmac");
+            String macAlgorithm = algorithm.replace("HMAC", "Hmac"); // e.g., "HMACSHA256" → "HmacSHA256"
 
-            // Combine password + salt
-            byte[] input = (password + salt).getBytes(StandardCharsets.UTF_8);
-
-            // Initialize the HMAC
+            // Use salt as the HMAC key
             Mac mac = Mac.getInstance(macAlgorithm);
             SecretKeySpec keySpec = new SecretKeySpec(salt.getBytes(StandardCharsets.UTF_8), macAlgorithm);
             mac.init(keySpec);
 
-            byte[] result = input;
+            byte[] result = password.getBytes(StandardCharsets.UTF_8);
             for (int i = 0; i < iterations; i++) {
                 result = mac.doFinal(result);
             }
 
-            // Convert to hex or base64, depending on how it's stored in legacy
-            return bytesToHex(result); // or Base64.getEncoder().encodeToString(result)
-
+            return bytesToHex(result);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to compute HMAC hash", e);
+            throw new RuntimeException("Error computing legacy HMAC hash", e);
         }
     }
 
